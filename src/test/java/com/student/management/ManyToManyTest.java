@@ -1,8 +1,13 @@
 package com.student.management;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.student.management.models.AadhaarCard;
+import com.student.management.services.StudentServices;
+import com.student.management.services.SubjectServices;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,10 +20,32 @@ import com.student.management.repository.SubjectRepository;
 public class ManyToManyTest {
 
     @Autowired
-    private SubjectRepository subjectRepository;
+    private StudentServices studentServices;
 
     @Test
     void saveSubjects(){
+        Student student1 = new Student();
+        student1.setName("zzz");
+        student1.setGrade(5);
+        student1.setContactNumber(9987344981L);
+
+        AadhaarCard a1 = new AadhaarCard();
+        a1.setAadhaarNumber("1344 5512 6777");
+        student1.setAadhaarCard(a1);
+
+        Student student2 = new Student();
+        student2.setName("yyy");
+        student2.setGrade(10);
+        student2.setContactNumber(9981114981L);
+
+        AadhaarCard a2 = new AadhaarCard();
+        a2.setAadhaarNumber("4444 5512 6117");
+        student1.setAadhaarCard(a2);
+
+        List<Student> stud = new ArrayList<>();
+        stud.add(student1);
+        stud.add(student2);
+
         Subject subject = new Subject();
         subject.setSubjectName("Java");
 
@@ -28,21 +55,19 @@ public class ManyToManyTest {
         Subject subject2 = new Subject();
         subject2.setSubjectName("C++");
 
-        Student student1 = new Student();
-        student1.setName("zzz");
-        student1.setGrade(5);
-        student1.setContactNumber(9987344981L);
-        student1.setSubjects(Set.of(subject, subject1, subject2));
-        
-        subjectRepository.save(subject);
-        subjectRepository.save(subject1);
-        subjectRepository.save(subject2);
-    }
+        Set<Subject> subjectList = new HashSet<>();
+        subjectList.add(subject);
+        subjectList.add(subject1);
+        subjectList.add(subject2);
 
-    @Test
-    public void findAll(){
-        List<Subject> subjectsList = subjectRepository.findAll();
-        System.out.println(subjectsList);
-
+        for (Student s :stud){
+            s.setSubjects(subjectList);
+            for(Subject sb : subjectList){
+                    sb.getStudent().add(s);
+            }
+        }
+        for(Student student :stud) {
+            studentServices.save(student);
+        }
     }
 }
